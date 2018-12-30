@@ -1,3 +1,19 @@
+/*
+Published by Miles Nash on 12.30.2018
+project: "countdown-clock"
+file: "Arduino code"
+github: miles-nash
+https://github.com/miles-nash/countdown-clock/new/master
+
+License:
+Attribution-NonCommercial-ShareAlike 
+CC BY-NC-SA
+Others may remix,tweak and build upon this work non-commercially,
+as long as they credit me aND liscence their creations under these terms
+
+*/
+//THIS LINE AND ALL LINES ABOVE MUST BE INCLUDED IN REMIXED, TWEAKED, OR BUILT UPON CODE
+
 #include <RGBmatrixPanel.h>
 #define CLK  8   
 #define OE   9
