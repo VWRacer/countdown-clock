@@ -1,0 +1,26 @@
+#include <RGBmatrixPanel.h>
+#define CLK  8   
+#define OE   9
+#define LAT 10
+#define A   A0
+#define B   A1
+#define C   A2
+
+RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
+
+void setup() {
+  
+  matrix.begin();
+}
+
+void loop() {
+   for(int i = 9; i > 0; i --){
+    matrix.fillScreen(matrix.Color333(0, 0, 0));
+    matrix.setCursor(11,1);
+    matrix.setTextSize(2);
+    matrix.setTextColor(matrix.Color333(random(1,7),random(1,7),random(1,7)));
+    matrix.print(i);
+    delay(1000);
+  }
+  
+}
