@@ -61,10 +61,8 @@ static const uint16_t PROGMEM ballcolor[3] = {
   0x1000  // Red=1
 };
 
-bool update;
 int currentNum;
 int countDownNum;
-int lastUpdate = 0;
 
 
 void setup() {
@@ -89,15 +87,18 @@ void loop() {
   matrix.setTextColor(matrix.ColorHSV(hue, 255, 255, true));
   
   int lastSecondsLeft = secondsLeft;
+  int lastMinutesLeft = minutesLeft;
+  int lastDaysLeft = daysLeft;
   countdownClock(countHour, countDay, countMonth, countYear); //update countdown
   //hour(0-23),day, month(1-12), year
-  if(lastSecondsLeft != secondsLeft){
-    update = true;
-  }
 
-  if(update){
+  //clear the display when a digit being displayed changes
+  if(hoursLeft < 1 && lastSecondsLeft != secondsLeft){
     matrix.fillScreen(0);
-    update = false;
+  }else if(daysLeft < 1 && lastMinutesLeft!= minutesLeft){
+    matrix.fillScreen(0);
+  }else if(lastDaysLeft != daysLeft){
+    matrix.fillScreen(0);
   }
 
   if(secondsLeft == -1){
