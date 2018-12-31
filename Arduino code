@@ -26,6 +26,18 @@ RTC_DS3231 rtc;
 #define B   A1
 #define C   A2
 
+////
+//date and time of the event being counted to
+int countHour = 0; //(0-23)
+int countDay = 1; //(1 - 30ish)
+int countMonth = 1; //(1- 12)
+int countYear = 2019; // the date limited to being less than a year (364 days) away
+
+//the message displayed once the event occurs:
+String messageLine1 = "Happy"; //maximum of 5 characters
+String messageLine2 = "2019"; //maximum of 4 characters
+///
+
 bool over;
 int daysLeft;
 int hoursLeft;
@@ -53,26 +65,29 @@ int lastUpdate = 0;
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     while (1);
   }
 
+  //generic setup
   over == false;
   hue = 0;
   currentNum = 20;
   matrix.begin(); 
+  
+  //set the date and time based off of the RTC
   DateTime now = rtc.now();
-  setTime(now.unixtime() -1);
+  setTime(now.unixtime());
 }
 
 void loop() {
   matrix.setTextColor(matrix.ColorHSV(hue, 255, 255, true));
   
   int lastSecondsLeft = secondsLeft;
-  countdownClock(0, 0, 0, 2019); //update countdown
-  //hour(0-23),day, month(1-24), year
+  countdownClock(countHour, countDay, countMonth, countYear); //update countdown
+  //hour(0-23),day, month(1-12), year
   if(lastSecondsLeft != secondsLeft){
     update = true;
   }
@@ -83,14 +98,14 @@ void loop() {
   }
 
   if(secondsLeft == -1){
-    //event has occured
+    //event has occured, display message and RGB animation
     bounceBalls();
     matrix.setCursor(1,0);
     matrix.setTextSize(1);
     matrix.setTextColor(matrix.Color333(7,7,7));
-    matrix.print("HAPPY");
+    matrix.print(messageLine1);
     matrix.setCursor(5,9);
-    matrix.print("2019");
+    matrix.print(messageLine2);
     delay(3);
   }else if(daysLeft > 0 && daysLeft < 364){
     //day and hour display
@@ -206,7 +221,7 @@ void countdownClock(int h, int m, int d, int y){
   //displays time left until that date
   int currentDate = totalDate(month(),day(),year());
   int countdownDate = totalDate(m, d, y);
-  daysLeft = countdownDate - currentDate -1;
+  daysLeft = countdownDate - currentDate - 1;
   
 
   if (hour() > h){
