@@ -71,7 +71,7 @@ void loop() {
   matrix.setTextColor(matrix.ColorHSV(hue, 255, 255, true));
   
   int lastSecondsLeft = secondsLeft;
-  countdownClock(21, 30, 12, 2018); //update countdown
+  countdownClock(0, 0, 0, 2019); //update countdown
   //hour(0-23),day, month(1-24), year
   if(lastSecondsLeft != secondsLeft){
     update = true;
@@ -92,8 +92,8 @@ void loop() {
     matrix.setCursor(5,9);
     matrix.print("2019");
     delay(3);
-  }else if(daysLeft > 0 && daysLeft < 10){
-    //hour and minute display
+  }else if(daysLeft > 0 && daysLeft < 364){
+    //day and hour display
     matrix.setTextSize(1);
     if(daysLeft < 10){
       matrix.setCursor(4,1);
@@ -218,7 +218,7 @@ void countdownClock(int h, int m, int d, int y){
   minutesLeft = 59 - minute();
   secondsLeft = 59 - second();
 
-  if((hoursLeft < 0 || daysLeft < 0)){
+  if((hoursLeft < 0 || daysLeft < 0) || (daysLeft == 0 && hoursLeft == 0 && minutesLeft == 0 && secondsLeft == 0)){
     //return negative seconds
     Serial.println("event has occured");
     secondsLeft = -1;
