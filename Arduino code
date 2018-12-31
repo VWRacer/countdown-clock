@@ -228,7 +228,7 @@ void countdownClock(int h, int m, int d, int y){
   
 
   if (hour() >= h){
-    hoursLeft = 23 + h - hour() - 1;
+    hoursLeft = 23 + h - hour() ;
   }else{
     hoursLeft = h - hour() - 1;
   }
