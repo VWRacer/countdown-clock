@@ -14,12 +14,24 @@ as long as they credit me aND liscence their creations under these terms
 */
 //THIS LINE AND ALL LINES ABOVE MUST BE INCLUDED IN REMIXED, TWEAKED, OR BUILT UPON CODE
 #include <RGBmatrixPanel.h>
+#include <Wire.h>
+#include "RTClib.h"
+RTC_DS3231 rtc;
+#include <TimeLib.h>
+
 #define CLK  8   
 #define OE   9
 #define LAT 10
 #define A   A0
 #define B   A1
 #define C   A2
+
+bool over;
+int daysLeft;
+int hoursLeft;
+int minutesLeft;
+int secondsLeft;
+int daysInMonth[] = {31,28,31,30,31,30,31,31,30,31,30,31};
 
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 int hue;
@@ -36,54 +48,42 @@ static const uint16_t PROGMEM ballcolor[3] = {
 
 bool update;
 int currentNum;
+int countDownNum;
 int lastUpdate = 0;
 
 
 void setup() {
+  Serial.begin(115200);
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    while (1);
+  }
+
+  over == false;
   hue = 0;
   currentNum = 20;
-  matrix.setTextWrap(false); // Allow text to run off right edge
-  matrix.begin();
-  
+  matrix.begin(); 
+  DateTime now = rtc.now();
+  setTime(now.unixtime() -1);
 }
 
 void loop() {
+  matrix.setTextColor(matrix.ColorHSV(hue, 255, 255, true));
   
-   if(update){
-      matrix.fillScreen(0);
-      update = false;
-    }
-  
-  if(millis() - lastUpdate >= 1000){
-    lastUpdate = millis();
-    currentNum --;
-    if(currentNum >= 0){
-      update = true;
-    }
+  int lastSecondsLeft = secondsLeft;
+  countdownClock(21, 30, 12, 2018); //update countdown
+  //hour(0-23),day, month(1-24), year
+  if(lastSecondsLeft != secondsLeft){
+    update = true;
   }
 
-  if(currentNum > 60 && currentNum < 3600){
-    //min and sec display
-    
-    
+  if(update){
+    matrix.fillScreen(0);
+    update = false;
   }
-  if(currentNum < 10 && currentNum > 0){
-    //matrix.fillScreen(0);
-    matrix.setCursor(11,1);
-    matrix.setTextSize(2);
-    matrix.setTextColor(matrix.ColorHSV(hue, 255, 255, true));
-    matrix.print(currentNum);
-      
-  }  else if(currentNum < 60 && currentNum > 9){
-    
-    //matrix.fillScreen(matrix.Color333(0, 0, 0));
-    matrix.setCursor(4,1);
-    matrix.setTextSize(2);
-    matrix.setTextColor(matrix.ColorHSV(hue, 255, 255, true));
-    matrix.print(currentNum);
 
-  }  else if(currentNum <= 0){
-    
+  if(secondsLeft == -1){
+    //event has occured
     bounceBalls();
     matrix.setCursor(1,0);
     matrix.setTextSize(1);
@@ -92,23 +92,100 @@ void loop() {
     matrix.setCursor(5,9);
     matrix.print("2019");
     delay(3);
+  }else if(daysLeft > 0 && daysLeft < 10){
+    //hour and minute display
+    matrix.setTextSize(1);
+    if(daysLeft < 10){
+      matrix.setCursor(4,1);
+    }else{
+      matrix.setCursor(1,0);
+    }
+    matrix.print(daysLeft);
+    matrix.setCursor(14,1);
+    matrix.print("day");
+
+    if(hoursLeft < 10){
+      matrix.setCursor(4,9);
+    }else{
+      matrix.setCursor(1,9);
+    }
+
+    matrix.print(hoursLeft);
+    matrix.setCursor(14,9);
+    matrix.print("hrs");
+
+
+    
+  }else if(hoursLeft > 0){
+    //hour and min display
+    matrix.setTextSize(1);
+    if(hoursLeft < 10){
+      matrix.setCursor(4,1);
+    }else{
+      matrix.setCursor(1,0);
+    }
+    matrix.print(hoursLeft);
+    matrix.setCursor(14,1);
+    matrix.print("hrs");
+
+    if(minutesLeft < 10){
+      matrix.setCursor(4,9);
+    }else{
+      matrix.setCursor(1,9);
+    }
+
+    matrix.print(minutesLeft);
+    matrix.setCursor(14,9);
+    matrix.print("min");
+    
+  }else if(minutesLeft > 0){
+    //min and sec display
+    matrix.setTextSize(1);
+    if(minutesLeft < 10){
+      matrix.setCursor(4,1);
+    }else{
+      matrix.setCursor(1,0);
+    }
+    matrix.print(minutesLeft);
+    matrix.setCursor(14,1);
+    matrix.print("min");
+
+    if(secondsLeft < 10){
+      matrix.setCursor(4,9);
+    }else{
+      matrix.setCursor(1,9);
+    }
+
+    matrix.print(secondsLeft);
+    matrix.setCursor(14,9);
+    matrix.print("sec");
+    
+  }else if(secondsLeft < 10 && secondsLeft > 0){
+
+    matrix.setCursor(11,1);
+    matrix.setTextSize(2);
+    matrix.print(secondsLeft);
+      
+  }  else if(secondsLeft < 60 && secondsLeft > 9){
+    
+    matrix.setCursor(4,1);
+    matrix.setTextSize(2);
+    matrix.print(secondsLeft);
+
+  
+  } else if(secondsLeft < -1){
+    bounceBalls();
   }
   
-  #if !defined(__AVR__)
-    // On non-AVR boards, delay slightly so screen updates aren't too quick.
-    delay(20);
-  #endif
+
   
   hue += 1; //adjust to increase/decrease speed of pulsing
   
   if(hue >= 1536) hue -= 1536;
-
-  matrix.swapBuffers(false);
- 
 }
 
 void bounceBalls(){
-  matrix.fillScreen(0);
+  //matrix.fillScreen(0);
   byte i;
   for(i=0; i<3; i++) {
     // Draw 'ball'
@@ -122,4 +199,45 @@ void bounceBalls(){
     if((ball[i][1] == 0) || (ball[i][1] == (matrix.height() - 1)))
       ball[i][3] *= -1;
   }
+}
+
+void countdownClock(int h, int m, int d, int y){
+  //takes in hour(24 hour time), month, date, and year
+  //displays time left until that date
+  int currentDate = totalDate(month(),day(),year());
+  int countdownDate = totalDate(m, d, y);
+  daysLeft = countdownDate - currentDate -1;
+  
+
+  if (hour() > h){
+    hoursLeft = 24 + h - hour() - 1;
+  }else{
+    hoursLeft = h - hour() - 1;
+  }
+
+  minutesLeft = 59 - minute();
+  secondsLeft = 59 - second();
+
+  if((hoursLeft < 0 || daysLeft < 0)){
+    //return negative seconds
+    Serial.println("event has occured");
+    secondsLeft = -1;
+
+  }
+  
+  Serial.println(String(daysLeft) + "." + String(hoursLeft) + "." + String(minutesLeft) + "." + String(secondsLeft));
+
+}
+
+int totalDate(int m, int d, int y){
+  //takes in a month date and year
+  //calculates and returns the number of days since the December 31 1999
+  //1/1/2000 = 1
+ int days = 0;
+ for(int monthID = 1; monthID < m; monthID++){
+   days += daysInMonth[monthID -1];
+ }
+ days += d;
+ days += (y - 2000)*365;
+ return days;
 }
