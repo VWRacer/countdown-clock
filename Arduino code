@@ -36,6 +36,8 @@ int countYear = 2019; // the date limited to being less than a year (364 days) a
 //the message displayed once the event occurs:
 String messageLine1 = "Happy"; //maximum of 5 characters
 String messageLine2 = "2019"; //maximum of 4 characters
+
+int RGBPulseSpeed = 1; //speed at which the text color will change. Keep below 10 to start
 ///
 
 bool over;
@@ -194,7 +196,7 @@ void loop() {
   
 
   
-  hue += 1; //adjust to increase/decrease speed of pulsing
+  hue += RGBPulseSpeed; //adjust to increase/decrease speed of pulsing
   
   if(hue >= 1536) hue -= 1536;
 }
@@ -221,11 +223,11 @@ void countdownClock(int h, int m, int d, int y){
   //displays time left until that date
   int currentDate = totalDate(month(),day(),year());
   int countdownDate = totalDate(m, d, y);
-  daysLeft = countdownDate - currentDate - 1;
+  daysLeft = countdownDate - currentDate -1;
   
 
-  if (hour() > h){
-    hoursLeft = 24 + h - hour() - 1;
+  if (hour() >= h){
+    hoursLeft = 23 + h - hour() - 1;
   }else{
     hoursLeft = h - hour() - 1;
   }
