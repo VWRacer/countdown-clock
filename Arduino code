@@ -27,19 +27,21 @@ RTC_DS3231 rtc;
 #define B   A1
 #define C   A2
 
-////
+///////////////////////////////////////////////
+Settings
+///////////////////////////////////////////////
 //date and time of the event being counted to
-int countHour = 0; //(0-23)
-int countDay = 1; //(1 - 30ish)
-int countMonth = 1; //(1- 12)
-int countYear = 2019; // the date limited to being less than a year (364 days) away
+int countHour = 0; //(0-23)//0 for new years
+int countDay = 1; //(1 - 30ish) // 1 for new years
+int countMonth = 1; //(1- 12) //1 for new years
+int countYear = 2020; // the date limited to being less than a year (364 days) away
 
 //the message displayed once the event occurs:
 String messageLine1 = "Happy"; //maximum of 5 characters
 String messageLine2 = "2019"; //maximum of 4 characters
 
 int RGBPulseSpeed = 1; //speed at which the text color will change. Keep below 10 to start
-///
+///////////////////////////////////////////////
 
 bool over;
 int daysLeft;
