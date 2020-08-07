@@ -6,6 +6,12 @@ file: "Arduino code"
 github: miles-nash
 https://github.com/miles-nash/countdown-clock/new/master
 
+Modified by Jim Leether on 08.07.2020
+project: "countdown-clock"
+file: "NewYearsCountdown.ino"
+github: VWRacer
+https://github.com/VWRacer/countdown-clock
+
 License:
 Attribution-NonCommercial-ShareAlike 
 CC BY-NC-SA
@@ -26,6 +32,10 @@ as long as they credit me aND liscence their creations under these terms
 RTC_DS3231 rtc;
 #include <TimeLib.h>
 
+#define dropMotor 4
+#define eventLights 5
+#define confettiBlower 6
+#define spareRelay 7
 #define CLK  8   
 #define OE   9
 #define LAT 10
@@ -72,6 +82,12 @@ int countDownNum;
 
 
 void setup() {
+  //set pin mode for relay pins
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+  
   Serial.begin(9600);
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
@@ -110,7 +126,21 @@ void loop() {
     matrix.fillScreen(0);
   }
 
+  //start ball drop motor at appropriate time
+  if(secondsLeft == 90){
+    digitalWrite(4, HIGH); //turns on motor
+  }
+
+  //start confetti blower at 1 second to give it time to spin up
+  if(secondsLeft == 1){
+    digitalWrite(6, HIGH); //turns on blower
+  }
+
   if(secondsLeft == -1){
+    //stop ball drop motor
+    digitalWrite(4, LOW);
+    //turn on additional even lighting
+    digitalWrite(5, HIGH);
     //event has occured, display message and RGB animation
     bounceBalls();
     matrix.setCursor(1,0);
