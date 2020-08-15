@@ -48,11 +48,11 @@ RTC_DS3231 rtc;
 int countHour = 0; //(0-23)
 int countDay = 1; //(1 - 30ish)
 int countMonth = 1; //(1- 12)
-int countYear = 2020; // the date limited to being less than a year (364 days) away
+int countYear = 2021; // the date limited to being less than a year (364 days) away
 
 //the message displayed once the event occurs:
 String messageLine1 = "Happy"; //maximum of 5 characters
-String messageLine2 = "2019"; //maximum of 4 characters
+String messageLine2 = "2021"; //maximum of 4 characters
 
 int RGBPulseSpeed = 1; //speed at which the text color will change. Keep below 10 to start
 ///
@@ -84,9 +84,13 @@ int countDownNum;
 void setup() {
   //set pin mode for relay pins
   pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH);
   pinMode(5, OUTPUT);
+  digitalWrite(5, HIGH);
   pinMode(6, OUTPUT);
+  digitalWrite(6, HIGH);
   pinMode(7, OUTPUT);
+  digitalWrite(7, HIGH);
   
   Serial.begin(9600);
   if (! rtc.begin()) {
@@ -126,21 +130,41 @@ void loop() {
     matrix.fillScreen(0);
   }
 
+  //Serial.println(secondsLeft);
+
   //start ball drop motor at appropriate time
-  if(secondsLeft == 90){
-    digitalWrite(4, HIGH); //turns on motor
+  if(daysLeft == 0 && hoursLeft == 0 && minutesLeft == 1 && secondsLeft == 30){
+    digitalWrite(4, LOW); //turns on motor
   }
 
   //start confetti blower at 1 second to give it time to spin up
-  if(secondsLeft == 1){
-    digitalWrite(6, HIGH); //turns on blower
+  if(daysLeft == 0 && hoursLeft == 0 && minutesLeft == 0 && secondsLeft == 1){
+    digitalWrite(6, LOW); //turns on blower
   }
 
   if(secondsLeft == -1){
-    //stop ball drop motor
-    digitalWrite(4, LOW);
     //turn on additional even lighting
-    digitalWrite(5, HIGH);
+    digitalWrite(5, LOW);
+    //stop ball drop motor
+    digitalWrite(4, HIGH);
+    //strobe lights
+    digitalWrite(7, LOW);
+    delay(75);
+    digitalWrite(7, HIGH);
+    delay(75);
+    digitalWrite(7, LOW);
+    delay(75);
+    digitalWrite(7, HIGH);
+    delay(75);
+    digitalWrite(7, LOW);
+    delay(75);
+    digitalWrite(7, HIGH);
+    delay(75);
+    digitalWrite(7, LOW);
+    delay(75);
+    digitalWrite(7, HIGH);
+    delay(75);
+    digitalWrite(7, LOW);
     //event has occured, display message and RGB animation
     bounceBalls();
     matrix.setCursor(1,0);
@@ -259,14 +283,13 @@ void bounceBalls(){
   }
 }
 
-void countdownClock(int h, int m, int d, int y){
+void countdownClock(int h, int d, int m, int y){
   //takes in hour(24 hour time), month, date, and year
   //displays time left until that date
   int currentDate = totalDate(month(),day(),year());
   int countdownDate = totalDate(m, d, y);
-  daysLeft = countdownDate - currentDate -1;
+  daysLeft = countdownDate - currentDate;
   
-
   if (hour() >= h){
     hoursLeft = 23 + h - hour() ;
   }else{
